@@ -8,7 +8,7 @@ import { GameRoomScreen } from './screens/game-room.js';
 
 
 export default function App() {
-	const [screen, setScreen] = useState<Screen>("running_game")
+	const [screen, setScreen] = useState<Screen>("create_room")
 
 	function handleRoomJoin(name: string, room_code: string) {
 		console.log('name', name);
@@ -25,7 +25,7 @@ export default function App() {
 
 		// TODO: send request to the server (ws) for creating room
 		setScreen("waiting_area")
-	}	
+	}
 
 	if (screen === "auth") {
 		return <EntryScreen handleRoomJoin={handleRoomJoin} setScreen={setScreen} />

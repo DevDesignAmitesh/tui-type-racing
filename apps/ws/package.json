@@ -1,16 +1,18 @@
 {
-  "name": "@repo/managers",
+  "name": "ws",
   "module": "index.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
+    "@repo/managers": "*",
     "@repo/common": "*"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
-  "exports": {
-    "./manager": "./index.ts"
+  "dependencies": {
+    "@types/ws": "^8.18.1",
+    "ws": "^8.21.0"
   }
 }
