@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Box, Text, useInput} from 'ink';
+import { useWebContext } from '../context/ws.js';
 
 export function GameRoomScreen() {
 	const [sentence, setSentence] = useState<string>(
@@ -8,7 +9,6 @@ export function GameRoomScreen() {
 	const [counter, setCounter] = useState(0);
 	const [query, setQuery] = useState<string>('');
 	const [typedChars, setTypedChars] = useState<number>(0);
-	const [ws, setWs] = useState<WebSocket | null>(null)
 	const [users, setUsers] = useState<{
 		name: string;
 		id: string;
@@ -31,6 +31,8 @@ export function GameRoomScreen() {
 		}
 	]);
 
+	const { ws, room } = useWebContext();
+	
 	function handleCheck(val: string) {
 		let to_check_from = sentence.split(' ');
 		setTypedChars(p => p + 1);
@@ -49,21 +51,21 @@ export function GameRoomScreen() {
 	}
 
 	useEffect(() => {
-		const ws = new WebSocket("ws://localhost:8080");
-		setWs(ws);
-
-		ws.onmessage = (event) => {
-			const parsedData = JSON.parse(event.data);
-
-			if (parsedData.type === "progress") {
-				
-			}
-		}
-	}, [])
-
-	useEffect(() => {
 		handleCheck(query);
 	}, [query]);
+
+	useEffect(() => {
+    if (!ws) return;
+    if (!room) return;
+    if (room.users.length <= 1) return;
+
+    setInterval(() => {
+      ws.send(JSON.stringify({ 
+				type: "progress", 
+				payload: { data: DEFINE } 
+			}));
+    }, 100)
+  }, [ws]);
 
 	useInput((input, key) => {
 		if (progress === MIN) return;
@@ -77,17 +79,7 @@ export function GameRoomScreen() {
 		} else {
 			setQuery(p => p + input);
 		}
-	});
-
-	useEffect(() => {
-		if (!ws) return;
-		if (users.length <= 1) return;
-
-		setInterval(() => {
-			ws.send(JSON.stringify({ type: "progress", payload: { progress } }));
-		}, 100)
-	}, [ws]);
-	
+	});	
 
 	const MIN = 30;
 	const progress = Math.min(counter, 30);

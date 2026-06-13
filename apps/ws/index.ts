@@ -1,6 +1,7 @@
 import { WebSocketServer } from "ws";
 import { generateRoomCode } from "./utils";
 import { roomManager } from "@repo/managers/manager";
+import { MESSAGE_TYPE } from "@repo/common/common";
 
 const server  = new WebSocketServer({ port: 8080 });
 const MAX_MEMBERS = 4;
@@ -14,7 +15,7 @@ server.on("connection", (ws) => {
     const parsedData = JSON.parse(data.toString());
 
     // event: room_create
-    if (parsedData.type === "room_create") {
+    if (parsedData.type === MESSAGE_TYPE.room_create) {
       const { room_name, admin_name } = parsedData.payload;
 
       // generate room_code, admin_id, room_id
@@ -49,7 +50,7 @@ server.on("connection", (ws) => {
     }
 
     // event: room_join
-    if (parsedData.type === "room_join") {
+    if (parsedData.type === MESSAGE_TYPE.room_join) {
       const { room_code, user_name } = parsedData.payload;
       
       const existingRoom = roomManager.get(room_code);
@@ -81,7 +82,7 @@ server.on("connection", (ws) => {
     }
     
     // event: room_start
-    if (parsedData.type === "room_start") {
+    if (parsedData.type === MESSAGE_TYPE.room_start) {
       const { room_code, admin_id } = parsedData.payload;
 
       const existingRoom = roomManager.get(room_code);
@@ -103,7 +104,7 @@ server.on("connection", (ws) => {
     }
 
     // event: room_broad_cast
-    if (parsedData.type === "room_broad_cast") {
+    if (parsedData.type === MESSAGE_TYPE.room_broad_cast) {
       const { room_code, userId, data } = parsedData.payload;
 
       const existingRoom = roomManager.get(room_code);

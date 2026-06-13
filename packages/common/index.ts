@@ -19,3 +19,11 @@ export type Room = {
   adminId: string;
   users: User[]
 }
+
+export const MESSAGE_TYPE = {
+  room_create: "room_create",
+  room_join: "room_join",
+  room_start: "room_start",
+  room_broad_cast: "room_broad_cast"
+}
+
