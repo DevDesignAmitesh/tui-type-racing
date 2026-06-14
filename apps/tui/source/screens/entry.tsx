@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Gradient from "ink-gradient";
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import { type EntryScreenInput } from '@repo/common/common';
@@ -24,6 +25,16 @@ export function EntryScreen({
 		}
 	});
 
+
+const ART = [
+  "████████╗██╗   ██╗██████╗ ███████╗██████╗ ",
+  "╚══██╔══╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗",
+  "   ██║    ╚████╔╝ ██████╔╝█████╗  ██████╔╝",
+  "   ██║     ╚██╔╝  ██╔═══╝ ██╔══╝  ██╔══██╗",
+  "   ██║      ██║   ██║     ███████╗██║  ██║",
+  "   ╚═╝      ╚═╝   ╚═╝     ╚══════╝╚═╝  ╚═╝",
+].join("\n");
+	
 	return (
 		<Box
     justifyContent="center"
@@ -31,15 +42,13 @@ export function EntryScreen({
     flexDirection="column"
     width={'100%'}
     height={'100%'}
-    borderStyle={'single'}
-    borderColor={'blue'}
+    // borderStyle={'single'}
+    // borderColor={'blue'}
     display="flex"
 		>
       
-      <Box marginBottom={2}>
-        <Text dimColor bold  color={'whiteBright'}>
-          TYPE RACER
-        </Text>
+			<Box width={"100%"} marginBottom={2} marginTop={4} alignItems='center' justifyContent='center' display='flex'>
+				<Gradient name="mind">{ART}</Gradient>
       </Box>
 
       <Text dimColor italic color={'whiteBright'}>

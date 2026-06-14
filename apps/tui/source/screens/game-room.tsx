@@ -46,7 +46,6 @@ export function GameRoomScreen() {
 	}, [query]);
 
 	const progressRef = useRef(progress);
-
 	
 	useEffect(() => {
 		progressRef.current = progress;
