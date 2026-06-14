@@ -43,7 +43,7 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
 
       if (parsedData.type === "someone_left") {
         // TODO: add toast notifyy (user_name left the room)
-        const { room, user_name } = parsedData.payload;
+        const { room } = parsedData.payload;
         setRoom(room);
       }
 

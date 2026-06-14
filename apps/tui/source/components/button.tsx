@@ -9,7 +9,7 @@ export const Button = ({ label, action }: {
 	const { isFocused } = useFocus(); 
 
 	// Listens for keystrokes only when this button is actively focused
-	useInput((input, key) => {
+	useInput((_input, key) => {
 		if (key.return && isFocused) {
 			action();
 		}
