@@ -1,6 +1,6 @@
 {
-	"name": "01",
-	"version": "0.0.0",
+	"name": "tui-typer",
+	"version": "1.0.3",
 	"license": "MIT",
 	"type": "module",
 	"engines": {
@@ -9,6 +9,12 @@
 	"files": [
 		"dist"
 	],
+	"bin": {
+    "tui-typer": "./dist/cli.js"
+  },
+	"scripts": {
+		"build-library": "tsup source/* --format cjs,esm --dts"
+	},
 	"dependencies": {
 		"ink": "^4.1.0",
 		"ink-gradient": "^4.0.1",
@@ -48,5 +54,8 @@
 			"react/prop-types": "off"
 		}
 	},
-	"prettier": "@vdemedes/prettier-config"
+	"prettier": "@vdemedes/prettier-config",
+	"publishConfig": {
+		"registry": "https://registry.npmjs.org"
+	}
 }
