@@ -90,6 +90,7 @@ server.on("connection", (ws) => {
       
       if (!existingRoom) return;
       if (existingRoom.adminId !== admin_id) return;
+      if (existingRoom.users.length <= 1) return;
 
       roomManager.create({
         ...existingRoom,

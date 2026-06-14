@@ -31,7 +31,7 @@ export function GameRoomScreen() {
 	}
 
 	const MIN = 30;
-	const progress = Math.min(counter, 30);
+	const progress = Math.min(counter, MIN);
 	
 	const startTime = useRef(Date.now());
 	const elapsedMinutes = (Date.now() - startTime.current) / 1000 / 60;
@@ -45,31 +45,40 @@ export function GameRoomScreen() {
 		handleCheck(query);
 	}, [query]);
 
-	useEffect(() => {
-    if (!ws) return;
-    if (!currentUser) return;
-    if (!room) return;
-    if (room.users.length <= 1) return;
+	const progressRef = useRef(progress);
 
-    setInterval(() => {
-      sendWsMessageFromClient({
+	
+	useEffect(() => {
+		progressRef.current = progress;
+	}, [progress]);
+	
+	useEffect(() => {
+		if (!ws || !currentUser || !room) return;
+		if (room.users.length <= 1) return;
+
+		const intervalId = setInterval(() => {
+			sendWsMessageFromClient({
 				ws,
 				dataToSend: {
 					type: "room_broad_cast",
 					payload: {
-						progress,
+						progress: progressRef.current,
 						room_code: room.code,
 						user_id: currentUser.id,
-					}
-				}
-			})
-    }, 2 * 1000)
-  }, [ws, room, currentUser]);
+					},
+				},
+			});
+		}, 2000);
+
+		return () => clearInterval(intervalId);
+	}, [ws, currentUser, room?.code]);
 
 	useInput((input, key) => {
 		if (progress === MIN) return;
 
-		if (key.return) {
+		if (key.ctrl && input === "c") {
+			process.exit(1);
+		} else if (key.return) {
 			return;
 		} else if (key.ctrl && input === 'w') {
 			setQuery('');

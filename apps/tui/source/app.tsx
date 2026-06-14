@@ -12,7 +12,7 @@ export default function App() {
 	const { ws, screen, setCurrentUser } = useWebContext();
 
 	const handleRoomJoin = useCallback((user_name: string, room_code: number) => {
-		if (!ws) return;
+		if (!ws || !user_name || !room_code) return;
 		
 		const user_id = crypto.randomUUID();
 		
@@ -33,7 +33,7 @@ export default function App() {
 	}, [ws])
 
 	const handleRoomCreation = useCallback((admin_name: string, room_name: string) => {
-		if (!ws) return;
+		if (!ws || !admin_name || !room_name) return;
 		
 		const admin_id = crypto.randomUUID();
 		

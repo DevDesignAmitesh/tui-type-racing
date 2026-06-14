@@ -8,7 +8,7 @@ export function WaitingAreaScreen() {
   const { room, currentUser, ws } = useWebContext();
 
   const leaveOrCancelRoom = useCallback((room_code: number, user_id: string) => {
-    if (!ws) return;
+    if (!ws || !room_code || !user_id) return;
 
     sendWsMessageFromClient({
       ws,
@@ -23,7 +23,7 @@ export function WaitingAreaScreen() {
   }, [ws])
   
   const startRoom = useCallback((room_code: number, admin_id: string) => {
-    if (!ws) return;
+    if (!ws || !room_code || !admin_id) return;
 
     sendWsMessageFromClient({
       ws,

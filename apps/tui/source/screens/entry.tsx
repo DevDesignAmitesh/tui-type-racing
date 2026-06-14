@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
-import { type Screen, type EntryScreenInput } from '@repo/common/common';
+import { type EntryScreenInput } from '@repo/common/common';
 import { Button } from '../components/button.js';
 import { useWebContext } from '../context/ws.js';
 
