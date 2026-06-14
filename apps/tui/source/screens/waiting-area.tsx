@@ -1,12 +1,42 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Box, Text } from 'ink';
 import { Button } from '../components/button.js';
 import { useWebContext } from '../context/ws.js';
+import { sendWsMessageFromClient } from '@repo/common/common';
 
 export function WaitingAreaScreen() {
+  const { room, currentUser, ws } = useWebContext();
 
-  const { room, currentUser } = useWebContext();
+  const leaveOrCancelRoom = useCallback((room_code: number, user_id: string) => {
+    if (!ws) return;
 
+    sendWsMessageFromClient({
+      ws,
+      dataToSend: {
+        type: "room_cancel_or_leave",
+        payload: {
+          room_code,
+          user_id
+        }
+      }
+    })
+  }, [ws])
+  
+  const startRoom = useCallback((room_code: number, admin_id: string) => {
+    if (!ws) return;
+
+    sendWsMessageFromClient({
+      ws,
+      dataToSend: {
+        type: "room_start",
+        payload: {
+          admin_id,
+          room_code
+        }
+      },
+    })
+  }, [ws])
+  
 	return (
 		<Box
       justifyContent="center"
@@ -24,6 +54,10 @@ export function WaitingAreaScreen() {
       
 			<Text dimColor italic color={'whiteBright'}>
 				use TAB for Buttons
+			</Text>
+
+			<Text color={'whiteBright'}>
+				CODE: ({room?.code})
 			</Text>
 
 
@@ -46,7 +80,7 @@ export function WaitingAreaScreen() {
       </Box>
       ))}
 
-      <Button label='start room' action={() => {}} />
+      {currentUser?.isAdmin && <Button label='start room' action={() => startRoom(room!.code, currentUser!.id)} />}
 
       <Box 
         width={"100%"} 
@@ -57,8 +91,10 @@ export function WaitingAreaScreen() {
         borderStyle={'single'} 
       />
       
-      <Button label='leave room' action={() => {}} />
-      <Button label='cancel room' action={() => {}} />
+      <Button 
+        label={currentUser?.isAdmin ? "cancel room" : "leave room"} 
+        action={() => leaveOrCancelRoom(room!.code, currentUser!.id)} 
+      />
 		</Box>
 	);
 }

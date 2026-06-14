@@ -18,6 +18,11 @@ class RoomManager {
     return this.rooms.get(code);
   }
   
+
+  delete(code: number) {
+    this.rooms.delete(code);
+  }
+  
 }
 
 export const roomManager = RoomManager.getInstance();

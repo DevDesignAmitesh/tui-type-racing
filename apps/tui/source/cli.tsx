@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'ink';
 import meow from 'meow';
 import App from './app.js';
+import { WebSocketContextProvider } from './context/ws.js';
 
 const cli = meow(
 	`
@@ -26,4 +27,8 @@ const cli = meow(
 );
 
 // render(<App name={cli.flags.name ?? "Stranger"} />);
-render(<App />);
+render((
+	<WebSocketContextProvider>
+		<App />
+	</WebSocketContextProvider>
+));

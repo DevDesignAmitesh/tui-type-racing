@@ -69,7 +69,7 @@ export function EntryScreen({
 			>
 				<TextInput
 					focus={screenInput === 'room_code'}
-					value={String(roomCode)}
+					value={roomCode == 0 ? "" : String(roomCode)}
 					onChange={(val) => setRoomCode(Number(val))}
 					placeholder="Join room with code (456789)"
 				/>

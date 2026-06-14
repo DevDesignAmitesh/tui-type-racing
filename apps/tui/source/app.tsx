@@ -13,13 +13,6 @@ export default function App() {
 
 	const handleRoomJoin = useCallback((user_name: string, room_code: number) => {
 		if (!ws) return;
-
-		console.log('user_name', user_name);
-		console.log('room_code', room_code);
-
-		// TODO: send request to the server (ws) for joining room
-		// this will depend on the payload we will recevie from the WebSocket Server
-		// setScreen("waiting_area") || setScreen("running_game");
 		
 		const user_id = crypto.randomUUID();
 		
@@ -27,6 +20,7 @@ export default function App() {
 			id: user_id,
 			name: user_name,
 			progress: 0,
+			isAdmin: false
 		})
 		
 		sendWsMessageFromClient({
@@ -40,8 +34,6 @@ export default function App() {
 
 	const handleRoomCreation = useCallback((admin_name: string, room_name: string) => {
 		if (!ws) return;
-		console.log('admin_name', admin_name);
-		console.log('room_name', room_name);
 		
 		const admin_id = crypto.randomUUID();
 		
@@ -49,6 +41,7 @@ export default function App() {
 			id: admin_id,
 			name: admin_name,
 			progress: 0,
+			isAdmin: true
 		})
 
 		sendWsMessageFromClient({

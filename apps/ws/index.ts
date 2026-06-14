@@ -7,7 +7,7 @@ const server  = new WebSocketServer({ port: 8080 });
 const MAX_MEMBERS = 4;
 
 server.on("connection", (ws) => {
-  ws.on("open", () => console.log("connected"))
+  console.log("connected")
 
   ws.on("error", console.error);
 
@@ -74,9 +74,11 @@ server.on("connection", (ws) => {
 
       const room = roomManager.get(room_code)!;
       
-      sendWsMessageFromServer({
-        ws,
-        dataToSend: { type: "room_join", payload: { room }}
+      room.users.forEach((usr) => {
+        sendWsMessageFromServer({
+          ws: usr.ws,
+          dataToSend: { type: "room_join", payload: { room }}
+        })
       })
     }
     
@@ -96,21 +98,23 @@ server.on("connection", (ws) => {
 
       const room = roomManager.get(room_code)!;
 
-      sendWsMessageFromServer({
-        ws,
-        dataToSend: { type: "room_start", payload: { room }}
+      room.users.forEach((usr) => {
+        sendWsMessageFromServer({
+          ws: usr.ws,
+          dataToSend: { type: "room_start", payload: { room }}
+        })
       })
     }
 
     // event: room_broad_cast
     if (parsedData.type === "room_broad_cast") {
-      const { room_code, userId, progress } = parsedData.payload;
+      const { room_code, user_id, progress } = parsedData.payload;
 
       const existingRoom = roomManager.get(room_code);
       if (!existingRoom) return;
-      if (!existingRoom.users.map((usr) => usr.id).includes(userId)) return;
+      if (!existingRoom.users.map((usr) => usr.id).includes(user_id)) return;
 
-      const existingUser = existingRoom.users.find((usr) => usr.id === userId);
+      const existingUser = existingRoom.users.find((usr) => usr.id === user_id);
       if (!existingUser) return;
       
       const updatedUser: User = {
@@ -121,20 +125,80 @@ server.on("connection", (ws) => {
       const filteredUsers = existingRoom.users.filter((usr) => usr.id !== existingUser.id);
       filteredUsers.push(updatedUser);
 
-      
       roomManager.create({
         ...existingRoom,
         users: filteredUsers
-      })
+      });
       
       const room = roomManager.get(room_code)!;
       
-      existingRoom.users.forEach((usr) => {
+      room.users.forEach((usr) => {
         sendWsMessageFromServer({
           ws: usr.ws,
           dataToSend: { type: "room_broad_cast", payload: { room }}
         })
-      })
+      });
+    }
+
+    // event: room_cancel_or_leave
+    if (parsedData.type === "room_cancel_or_leave") {
+      const { room_code, user_id } = parsedData.payload;
+
+      const existingRoom = roomManager.get(room_code);
+      if (!existingRoom) return;
+
+      const existingUser = existingRoom.users.find((usr) => usr.id === user_id);
+      if (!existingUser) return;
+
+      if (existingRoom.adminId === existingUser.id) {
+        existingRoom.users.forEach((usr) => {
+          sendWsMessageFromServer({
+            ws: usr.ws,
+            dataToSend: {
+              type: "room_cancelled",
+            }
+          })
+        })
+
+        roomManager.delete(room_code);        
+      } else {
+        const filteredUsers = existingRoom.users.filter((usr) => usr.id !== existingUser.id);
+        
+        // if only one person left delete the room
+        if (filteredUsers.length <= 1) {
+          roomManager.delete(room_code);
+
+          filteredUsers.forEach((usr) => {
+            sendWsMessageFromServer({
+              ws: usr.ws,
+              dataToSend: {
+                type: "room_cancelled",
+              }
+            })
+          });
+        } else {
+          roomManager.create({
+            ...existingRoom,
+            users: filteredUsers
+          });
+  
+          const room = roomManager.get(room_code)!;
+          
+          filteredUsers.forEach((usr) => {
+            sendWsMessageFromServer({
+              ws: usr.ws,
+              dataToSend: {
+                type: "someone_left",
+                payload: {
+                  room,
+                  user_name: existingUser.name
+                }
+              }
+            })
+          });
+        }
+
+      }
     }
   })
   

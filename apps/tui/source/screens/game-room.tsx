@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Box, Text, useInput} from 'ink';
 import { useWebContext } from '../context/ws.js';
+import { sendWsMessageFromClient } from '@repo/common/common';
 
 export function GameRoomScreen() {
 	const [sentence, setSentence] = useState<string>(
@@ -9,29 +10,8 @@ export function GameRoomScreen() {
 	const [counter, setCounter] = useState(0);
 	const [query, setQuery] = useState<string>('');
 	const [typedChars, setTypedChars] = useState<number>(0);
-	const [users, setUsers] = useState<{
-		name: string;
-		id: string;
-		position: number;
-	}[]>([
-		{
-			id: crypto.randomUUID(),
-			name: "one",
-			position: 10,
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "two",
-			position: 15,
-		},
-		{
-			id: crypto.randomUUID(),
-			name: "three",
-			position: 20,
-		}
-	]);
 
-	const { ws, room } = useWebContext();
+	const { ws, room, currentUser } = useWebContext();
 	
 	function handleCheck(val: string) {
 		let to_check_from = sentence.split(' ');
@@ -50,22 +30,41 @@ export function GameRoomScreen() {
 		}
 	}
 
+	const MIN = 30;
+	const progress = Math.min(counter, 30);
+	
+	const startTime = useRef(Date.now());
+	const elapsedMinutes = (Date.now() - startTime.current) / 1000 / 60;
+	
+	const wpm = elapsedMinutes > 0 ? Math.round(counter / elapsedMinutes) : 0;
+	
+	const accuracy =
+		typedChars === 0 ? 100 : Math.round((counter / typedChars) * 100);
+
 	useEffect(() => {
 		handleCheck(query);
 	}, [query]);
 
 	useEffect(() => {
     if (!ws) return;
+    if (!currentUser) return;
     if (!room) return;
     if (room.users.length <= 1) return;
 
     setInterval(() => {
-      ws.send(JSON.stringify({ 
-				type: "progress", 
-				payload: { data: DEFINE } 
-			}));
-    }, 100)
-  }, [ws]);
+      sendWsMessageFromClient({
+				ws,
+				dataToSend: {
+					type: "room_broad_cast",
+					payload: {
+						progress,
+						room_code: room.code,
+						user_id: currentUser.id,
+					}
+				}
+			})
+    }, 2 * 1000)
+  }, [ws, room, currentUser]);
 
 	useInput((input, key) => {
 		if (progress === MIN) return;
@@ -79,18 +78,7 @@ export function GameRoomScreen() {
 		} else {
 			setQuery(p => p + input);
 		}
-	});	
-
-	const MIN = 30;
-	const progress = Math.min(counter, 30);
-
-	const startTime = useRef(Date.now());
-	const elapsedMinutes = (Date.now() - startTime.current) / 1000 / 60;
-
-	const wpm = elapsedMinutes > 0 ? Math.round(counter / elapsedMinutes) : 0;
-
-	const accuracy =
-		typedChars === 0 ? 100 : Math.round((counter / typedChars) * 100);
+	});
 
 	return (
 		<Box flexDirection="column" alignItems="center" width="100%">
@@ -122,11 +110,11 @@ export function GameRoomScreen() {
 					Players
 				</Text>
 
-				{users.map((usr) => (
+				{room?.users.map((usr) => (
 						<Text key={usr.id}>
-						{usr.name} {'─'.repeat(usr.position)}
+						{usr.name} {'─'.repeat(usr.progress)}
 						🏃
-						{'─'.repeat(MIN - usr.position)}
+						{'─'.repeat(MIN - usr.progress)}
 						🏁
 					</Text>
 				))}

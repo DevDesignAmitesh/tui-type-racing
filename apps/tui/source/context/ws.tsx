@@ -30,11 +30,33 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
 			if (
           parsedData.type === "room_create" || 
           parsedData.type === "room_join"
-        ) {
+      ) {
 				const { room } = parsedData.payload;
         setRoom(room);
         setScreen("waiting_area")
-			}
+      }
+
+      if (parsedData.type === "room_cancelled") {
+        setScreen("auth");
+        setRoom(null);
+      }
+
+      if (parsedData.type === "someone_left") {
+        // TODO: add toast notifyy (user_name left the room)
+        const { room, user_name } = parsedData.payload;
+        setRoom(room);
+      }
+
+      if (parsedData.type === "room_start") {
+        const { room } = parsedData.payload;
+        setRoom(room);
+        setScreen("running_game")
+      }
+
+      if (parsedData.type === "room_broad_cast") {
+        const { room } = parsedData.payload;
+        setRoom(room);
+      }
 		}
 	}, []);
 

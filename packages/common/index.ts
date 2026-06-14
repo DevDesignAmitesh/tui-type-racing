@@ -11,7 +11,9 @@ export type User = {
   ws: ServerWs
 }
 
-export type CurrentUser = Omit<User, "ws">;
+export type CurrentUser = Omit<User, "ws"> & {
+  isAdmin: boolean
+}; 
 
 export type Room = {
   id: string;
@@ -59,8 +61,16 @@ export type WsDataFromClient =
     type: "room_broad_cast",
     payload: {
       room_code: number, 
-      userId: string,
+      user_id: string,
       progress: number
+    }
+  }
+  |
+  {
+    type: "room_cancel_or_leave",
+    payload: {
+      room_code: number, 
+      user_id: string,
     }
   }
 
@@ -93,6 +103,18 @@ export type WsDataFromServer =
     type: "room_broad_cast",
     payload: {
       room: Room
+    }
+  }
+  |
+  {
+    type: "room_cancelled",
+  }
+  |
+  {
+    type: "someone_left",
+    payload: {
+      room: Room,
+      user_name: string
     }
   }
 
