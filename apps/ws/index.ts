@@ -4,7 +4,7 @@ import { roomManager } from "@repo/managers/manager";
 import { MESSAGE_TYPE, sendWsMessageFromServer, type User, type WsDataFromClient } from "@repo/common/common";
 
 const server  = new WebSocketServer({ port: 8080 });
-const MAX_MEMBERS = 4;
+const MAX_MEMBERS = 10;
 
 server.on("connection", (ws) => {
   console.log("connected")

@@ -1,0 +1,6 @@
+services:      
+  ws:
+    image: amitesh252/tui-typer-be:latest
+    ports:
+      - 3003:8080
+    restart: on-failure
