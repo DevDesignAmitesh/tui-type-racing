@@ -3,18 +3,19 @@ import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import { type Screen, type EntryScreenInput } from '@repo/common/common';
 import { Button } from '../components/button.js';
+import { useWebContext } from '../context/ws.js';
 
 export function EntryScreen({
   handleRoomJoin,
-  setScreen,
 }: {
-  handleRoomJoin: (name: string, room_code: string) => void; 
-  setScreen: (input: Screen) => void;
+  handleRoomJoin: (user_name: string, room_code: number) => void; 
 }) {
 	const [name, setName] = useState<string>('');
-	const [roomCode, setRoomCode] = useState<string>('');
+	const [roomCode, setRoomCode] = useState<number>(0);
 	const [screenInput, setScreenInput] = useState<EntryScreenInput>('name');
   
+	const { setScreen } = useWebContext();
+	
 	useInput((_input, key) => {
 		if (key.downArrow) {
 			setScreenInput('room_code');
@@ -68,8 +69,8 @@ export function EntryScreen({
 			>
 				<TextInput
 					focus={screenInput === 'room_code'}
-					value={roomCode}
-					onChange={setRoomCode}
+					value={String(roomCode)}
+					onChange={(val) => setRoomCode(Number(val))}
 					placeholder="Join room with code (456789)"
 				/>
 			</Box>

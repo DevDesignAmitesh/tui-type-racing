@@ -3,17 +3,18 @@ import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import { type Screen, type CreateRoomScreenInput } from '@repo/common/common';
 import { Button } from '../components/button.js';
+import { useWebContext } from '../context/ws.js';
 
 export function CreateRoomScreen({
   handleRoomCreation,
-  setScreen,
 }: {
-  handleRoomCreation: (name: string, room_name: string) => void; 
-  setScreen: (input: Screen) => void;
+  handleRoomCreation: (admin_name: string, room_name: string) => void; 
 }) {
 	const [name, setName] = useState<string>('');
 	const [roomName, setRoomName] = useState<string>('');
 	const [screenInput, setScreenInput] = useState<CreateRoomScreenInput>('name');
+
+	const { setScreen } = useWebContext();
   
 	useInput((_input, key) => {
 		if (key.downArrow) {

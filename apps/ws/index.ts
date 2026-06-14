@@ -16,11 +16,10 @@ server.on("connection", (ws) => {
 
     // event: room_create
     if (parsedData.type === "room_create") {
-      const { room_name, admin_name } = parsedData.payload;
+      const { room_name, admin_name, admin_id } = parsedData.payload;
 
       // generate room_code, admin_id, room_id
       const room_id = crypto.randomUUID();
-      const admin_id = crypto.randomUUID();
       const room_code = generateRoomCode();
 
       // create room
@@ -52,24 +51,23 @@ server.on("connection", (ws) => {
 
     // event: room_join
     if (parsedData.type === "room_join") {
-      const { room_code, user_name } = parsedData.payload;
+      const { room_code, user_name, user_id } = parsedData.payload;
       
       const existingRoom = roomManager.get(room_code);
 
       if (!existingRoom) return;
       if (existingRoom.users.length >= MAX_MEMBERS) return;
-
-      const userId = crypto.randomUUID();
+      if (existingRoom.status !== "waiting") return;
       
       roomManager.create({
         ...existingRoom,
         users: [
           ...existingRoom.users,
           { 
-            id: userId, 
+            id: user_id, 
             name: user_name, 
             progress: 0, 
-            ws 
+            ws, 
           }
         ]
       });

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { Button } from '../components/button.js';
+import { useWebContext } from '../context/ws.js';
 
 export function WaitingAreaScreen() {
 
-  const name = "Amitesh";
-  
+  const { room, currentUser } = useWebContext();
+
 	return (
 		<Box
       justifyContent="center"
@@ -26,9 +27,9 @@ export function WaitingAreaScreen() {
 			</Text>
 
 
-			{Array.from({length: 5}).map((_, idx) => (
+			{room?.users.map((usr, idx) => (
         <Box
-          key={idx}
+          key={usr.id}
           width={'20%'}
           // height={4}
           paddingX={1}
@@ -41,7 +42,7 @@ export function WaitingAreaScreen() {
 			  >
           <Text>{idx + 1}.</Text>
 
-          <Text>{name}</Text>
+          <Text>{currentUser?.id === usr.id ? "You" : usr.name}</Text>
       </Box>
       ))}
 

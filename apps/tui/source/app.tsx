@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MESSAGE_TYPE, type Screen } from "@repo/common/common";
+import React, { useCallback, useState } from 'react';
+import { MESSAGE_TYPE, sendWsMessageFromClient, type Screen } from "@repo/common/common";
 import { EntryScreen } from './screens/entry.js';
 import { CreateRoomScreen } from "./screens/create-room.js";
 import { WaitingAreaScreen } from './screens/waiting-area.js';
@@ -9,38 +9,64 @@ import { useWebContext } from './context/ws.js';
 
 
 export default function App() {
-	const [screen, setScreen] = useState<Screen>("create_room")
+	const { ws, screen, setCurrentUser } = useWebContext();
 
-	const { ws } = useWebContext();
+	const handleRoomJoin = useCallback((user_name: string, room_code: number) => {
+		if (!ws) return;
 
-	function handleRoomJoin(name: string, room_name: string) {
-		console.log('name', name);
-		console.log('room_name', room_name);
+		console.log('user_name', user_name);
+		console.log('room_code', room_code);
 
-		ws?.send(JSON.stringify({
-			type: MESSAGE_TYPE.room_create,
-			payload: {
-				room_name,
-				admin_name: name
-			}
-		}))
 		// TODO: send request to the server (ws) for joining room
 		// this will depend on the payload we will recevie from the WebSocket Server
 		// setScreen("waiting_area") || setScreen("running_game");
-	}	
+		
+		const user_id = crypto.randomUUID();
+		
+		setCurrentUser({
+			id: user_id,
+			name: user_name,
+			progress: 0,
+		})
+		
+		sendWsMessageFromClient({
+			ws,
+			dataToSend: {
+				type: "room_join",
+				payload: { room_code, user_name, user_id }
+			}
+		})
+	}, [ws])
 
-	function handleRoomCreation(name: string, room_name: string) {
-		console.log('name', name);
+	const handleRoomCreation = useCallback((admin_name: string, room_name: string) => {
+		if (!ws) return;
+		console.log('admin_name', admin_name);
 		console.log('room_name', room_name);
+		
+		const admin_id = crypto.randomUUID();
+		
+		setCurrentUser({
+			id: admin_id,
+			name: admin_name,
+			progress: 0,
+		})
+
+		sendWsMessageFromClient({
+			ws,
+			dataToSend: {
+				type: "room_create",
+				payload: { admin_name, room_name, admin_id }
+			}
+		})
 
 		// TODO: send request to the server (ws) for creating room
-		setScreen("waiting_area")
-	}
+		// setScreen("waiting_area")
+	}, [ws])
 
 	if (screen === "auth") {
-		return <EntryScreen handleRoomJoin={handleRoomJoin} setScreen={setScreen} />
+		return <EntryScreen handleRoomJoin={handleRoomJoin} />
 	} else if (screen === "create_room") {
-		return <CreateRoomScreen handleRoomCreation={handleRoomCreation} setScreen={setScreen} />
+		return <CreateRoomScreen handleRoomCreation={handleRoomCreation} />
 	} else if (screen === "waiting_area") {
 		return <WaitingAreaScreen />
 	} else if (screen === "running_game") {

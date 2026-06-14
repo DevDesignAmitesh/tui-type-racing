@@ -1,4 +1,4 @@
-import { WebSocket } from "ws";
+import { WebSocket as ServerWs } from "ws";
 
 export type Screen = "auth" | "create_room" | "waiting_area" | "running_game"
 export type EntryScreenInput = "name" | "room_code"
@@ -8,8 +8,10 @@ export type User = {
   id: string;
   name: string;
   progress: number;
-  ws: WebSocket
+  ws: ServerWs
 }
+
+export type CurrentUser = Omit<User, "ws">;
 
 export type Room = {
   id: string;
@@ -33,6 +35,7 @@ export type WsDataFromClient =
     payload: {
       room_name: string, 
       admin_name: string
+      admin_id: string
     }
   } | 
   {
@@ -40,6 +43,7 @@ export type WsDataFromClient =
     payload: {
       room_code: number, 
       user_name: string
+      user_id: string
     }
   }
   |
@@ -92,7 +96,7 @@ export type WsDataFromServer =
     }
   }
 
-export const sendWsMessageFromServer = ({ ws, dataToSend }: { ws: WebSocket, dataToSend: WsDataFromServer }) => {
+export const sendWsMessageFromServer = ({ ws, dataToSend }: { ws: ServerWs, dataToSend: WsDataFromServer }) => {
   ws.send(JSON.stringify(dataToSend))
 }
 
