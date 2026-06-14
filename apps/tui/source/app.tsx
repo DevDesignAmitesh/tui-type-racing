@@ -1,9 +1,9 @@
-import React, { useCallback, useState } from 'react';
-import { MESSAGE_TYPE, sendWsMessageFromClient, type Screen } from "@repo/common/common";
+import React, { useCallback } from 'react';
+import { sendWsMessageFromClient } from "@repo/common/common";
 import { EntryScreen } from './screens/entry.js';
 import { CreateRoomScreen } from "./screens/create-room.js";
 import { WaitingAreaScreen } from './screens/waiting-area.js';
-import { Text } from 'ink';
+import { Box, Text, useStdout } from 'ink';
 import { GameRoomScreen } from './screens/game-room.js';
 import { useWebContext } from './context/ws.js';
 
@@ -56,6 +56,21 @@ export default function App() {
 		// setScreen("waiting_area")
 	}, [ws])
 
+  const { stdout } = useStdout();
+
+  const width = stdout?.columns || 80;
+  const height = stdout?.rows || 24;
+
+	if (width < 70 || height < 20) {
+		return (
+			<Box justifyContent="center" alignItems="center">
+				<Text color="redBright">
+					Terminal too small. Please resize and restart.
+				</Text>
+			</Box>
+		);
+	}
+	
 	if (screen === "auth") {
 		return <EntryScreen handleRoomJoin={handleRoomJoin} />
 	} else if (screen === "create_room") {

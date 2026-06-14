@@ -30,6 +30,7 @@ export function EntryScreen({
     alignItems="center"
     flexDirection="column"
     width={'100%'}
+    height={'100%'}
     borderStyle={'single'}
     borderColor={'blue'}
     display="flex"

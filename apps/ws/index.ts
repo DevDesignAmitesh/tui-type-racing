@@ -117,18 +117,17 @@ server.on("connection", (ws) => {
 
       const existingUser = existingRoom.users.find((usr) => usr.id === user_id);
       if (!existingUser) return;
-      
-      const updatedUser: User = {
-        ...existingUser,
-        progress,
-      }
-      
-      const filteredUsers = existingRoom.users.filter((usr) => usr.id !== existingUser.id);
-      filteredUsers.push(updatedUser);
+
+      const updatedUsers = existingRoom.users.map((usr) => {
+        if (existingUser.id === usr.id) {
+          return { ...usr, progress }
+        }
+        return usr;
+      });
 
       roomManager.create({
         ...existingRoom,
-        users: filteredUsers
+        users: updatedUsers
       });
       
       const room = roomManager.get(room_code)!;
@@ -152,6 +151,8 @@ server.on("connection", (ws) => {
       if (!existingUser) return;
 
       if (existingRoom.adminId === existingUser.id) {
+        roomManager.delete(room_code);    
+
         existingRoom.users.forEach((usr) => {
           sendWsMessageFromServer({
             ws: usr.ws,
@@ -160,45 +161,62 @@ server.on("connection", (ws) => {
             }
           })
         })
-
-        roomManager.delete(room_code);        
       } else {
         const filteredUsers = existingRoom.users.filter((usr) => usr.id !== existingUser.id);
         
+        roomManager.create({
+          ...existingRoom,
+          users: filteredUsers
+        });
+
+        const room = roomManager.get(room_code)!;
+        
+        existingRoom.users.forEach((usr) => {
+          sendWsMessageFromServer({
+            ws: usr.ws,
+            dataToSend: {
+              type: "someone_left",
+              payload: {
+                room,
+                user_name: existingUser.name
+              }
+            }
+          })
+        });
+        
         // if only one person left delete the room
-        if (filteredUsers.length <= 1) {
-          roomManager.delete(room_code);
+        // if (filteredUsers.length <= 1) {
+        //   roomManager.delete(room_code);
 
-          filteredUsers.forEach((usr) => {
-            sendWsMessageFromServer({
-              ws: usr.ws,
-              dataToSend: {
-                type: "room_cancelled",
-              }
-            })
-          });
-        } else {
-          roomManager.create({
-            ...existingRoom,
-            users: filteredUsers
-          });
+        //   existingRoom.users.forEach((usr) => {
+        //     sendWsMessageFromServer({
+        //       ws: usr.ws,
+        //       dataToSend: {
+        //         type: "room_cancelled",
+        //       }
+        //     })
+        //   });
+        // } else {
+        //   roomManager.create({
+        //     ...existingRoom,
+        //     users: filteredUsers
+        //   });
   
-          const room = roomManager.get(room_code)!;
+        //   const room = roomManager.get(room_code)!;
           
-          filteredUsers.forEach((usr) => {
-            sendWsMessageFromServer({
-              ws: usr.ws,
-              dataToSend: {
-                type: "someone_left",
-                payload: {
-                  room,
-                  user_name: existingUser.name
-                }
-              }
-            })
-          });
-        }
-
+        //   existingRoom.users.forEach((usr) => {
+        //     sendWsMessageFromServer({
+        //       ws: usr.ws,
+        //       dataToSend: {
+        //         type: "someone_left",
+        //         payload: {
+        //           room,
+        //           user_name: existingUser.name
+        //         }
+        //       }
+        //     })
+        //   });
+        // }
       }
     }
   })

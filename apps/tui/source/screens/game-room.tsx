@@ -68,7 +68,7 @@ export function GameRoomScreen() {
 					},
 				},
 			});
-		}, 2000);
+		}, 1000);
 
 		return () => clearInterval(intervalId);
 	}, [ws, currentUser, room?.code]);
@@ -98,9 +98,9 @@ export function GameRoomScreen() {
 				borderColor="greenBright"
 				paddingX={1}
 			>
-				<Text bold color="yellowBright">
+				{/* <Text bold color="yellowBright">
 					TYPING RACE
-				</Text>
+				</Text> */}
 
 				<Text>
 					{'  '}• Words: {counter}

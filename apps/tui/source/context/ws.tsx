@@ -1,5 +1,5 @@
 import { CurrentUser, Screen, WsDataFromServer, type Room } from "@repo/common/common";
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import React from "react";
 import { WS_URL } from "../utils.js";
 
@@ -60,18 +60,21 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
 		}
 	}, []);
 
+
+  const value = useMemo(
+    () => ({
+      ws,
+      room,
+      screen,
+      setScreen,
+      currentUser,
+      setCurrentUser
+    }),
+    [ws, room, screen, currentUser]
+  );
   
   return (
-    <WebSocketContext.Provider 
-      value={{ 
-        ws, 
-        room, 
-        screen, 
-        setScreen,
-        currentUser,
-        setCurrentUser
-      }}
-    >
+    <WebSocketContext.Provider value={value} >
       {children}
     </WebSocketContext.Provider>
   )
