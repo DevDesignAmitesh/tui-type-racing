@@ -23,7 +23,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./dockerfiles/ws.dockerfile
+          file: ./dockerfile/ws.dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/tui-typer-be:latest
 
@@ -34,11 +34,10 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd tui-typer-ws$
+            cd tui-typer-ws
             sudo docker compose down -v
             sudo docker system prune -a -f --volumes
             sudo docker builder prune -a -f
             sudo docker compose pull
             sudo docker compose up -d --force-recreate
-      
       
