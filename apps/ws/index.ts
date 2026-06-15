@@ -93,7 +93,7 @@ server.on("connection", (ws) => {
       
       if (!existingRoom) return;
       if (existingRoom.adminId !== admin_id) return;
-      if (existingRoom.users.length <= 1) return;
+         if (existingRoom.users.length <= 1) return;
 
       roomManager.create({
         ...existingRoom,
@@ -181,7 +181,8 @@ server.on("connection", (ws) => {
               type: "someone_left",
               payload: {
                 room,
-                user_name: existingUser.name
+                user_name: existingUser.name,
+                user_id: existingUser.id,
               }
             }
           })
@@ -233,7 +234,7 @@ server.on("connection", (ws) => {
       const existingUser = existingRoom.users.find((usr) => usr.id === user_id);
       if (!existingUser) return;
       
-      const last_updated_postion = positionManager.getLastUpdatedPositon(room_code);
+      const last_updated_postion = positionManager.getLastUpdatedPositon(room_code) || 0;
       if (last_updated_postion === undefined) return;
       
       positionManager.create({
@@ -247,12 +248,30 @@ server.on("connection", (ws) => {
       });
       if (curr_user_pos === undefined) return;
 
-      existingRoom.users.forEach((usr) => {
+      const updatedUsers = existingRoom.users.map((usr) => {
+        if (existingUser.id === usr.id) {
+          return {
+            ...usr,
+            position: curr_user_pos 
+          }
+        }
+
+        return usr
+      })
+      
+      roomManager.create({
+        ...existingRoom,
+        users: updatedUsers
+      })
+      
+      const room = roomManager.get(room_code)!;
+      
+      room.users.forEach((usr) => {
         sendWsMessageFromServer({
           ws: usr.ws,
           dataToSend: {
             type: "room_ends",
-            payload: { pos: curr_user_pos }
+            payload: { room, pos: curr_user_pos, user_id: existingUser.id }
           }
         })
       })

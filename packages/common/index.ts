@@ -128,6 +128,7 @@ export type WsDataFromServer =
     type: "someone_left",
     payload: {
       room: Room,
+      user_id: string
       user_name: string
     }
   }
@@ -135,7 +136,9 @@ export type WsDataFromServer =
   {
     type: "room_ends",
     payload: {
+      room: Room,
       pos: number,
+      user_id: string
     }
   }
 

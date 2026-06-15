@@ -39,6 +39,9 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
 		ws.onmessage = (event) => {
 			const parsedData = JSON.parse(event.data) as WsDataFromServer;
 
+      console.log("data from the server");
+      console.log(parsedData)
+      
 			if (
           parsedData.type === "room_create" || 
           parsedData.type === "room_join"
@@ -55,8 +58,12 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
 
       if (parsedData.type === "someone_left") {
         // TODO: add toast notifyy (user_name left the room)
-        const { room } = parsedData.payload;
-        setRoom(room);
+        const { room, user_id } = parsedData.payload;
+        if (user_id === currentUserRef.current?.id) {
+          setScreen("auth")
+        } else {
+          setRoom(room);
+        }
       }
 
       if (parsedData.type === "room_start") {
@@ -71,12 +78,15 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
       }
 
       if (parsedData.type === "room_ends") {
-        const { pos } = parsedData.payload;
+        const { room, pos, user_id } = parsedData.payload;
+        setRoom(room)
 
-        setCurrentUser({
-          ...currentUserRef.current!,
-          position: pos,
-        })
+        if (user_id === currentUserRef.current?.id) {
+          setCurrentUser({
+            ...currentUserRef.current!,
+            position: pos,
+          })
+        }
       }
 		}
 	}, []);

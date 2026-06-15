@@ -2,7 +2,9 @@ import { type PositionMetaData } from "@repo/common/common";
 
 class PositionManager {
   private static instance: PositionManager
-  private positions: Map<PositionMetaData, number> = new Map();
+
+  // room and user based position 
+  private positions: Map<string, number> = new Map();
 
   // room_code, last_updated_postions
   private position: Map<number, number> = new Map();
@@ -12,17 +14,25 @@ class PositionManager {
     return PositionManager.instance
   }
 
+  getKey (data: PositionMetaData) {
+    return `${data.room_code}:${data.user_id}`
+  }
+
   create(data: PositionMetaData, position: number) {
-    this.positions.set(data, position);
+    // setting user's position
+    this.positions.set(this.getKey(data), position);
+
+    // setting last updated position of the room
     this.position.set(data.room_code, position);
   }
 
   get(data: PositionMetaData) {
-    return this.positions.get(data);
+    console.log("this.positions", this.positions);
+    return this.positions.get(this.getKey(data));
   }
 
   delete(data: PositionMetaData) {
-    this.positions.delete(data);
+    this.positions.delete(this.getKey(data));
   }  
 
   getLastUpdatedPositon(room_code: number) {

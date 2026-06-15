@@ -53,12 +53,11 @@ export function GameRoomScreen() {
 	
 	useEffect(() => {
 		if (!ws) return;
-		if (roomRef.current.users.length <= 1) return;
-		if (currentUserRef.current.position !== undefined) return;
-
-		console.log("progressRef.current >= MIN", progressRef.current >= MIN)
 		
-		const intervalId = setInterval(() => {
+		const interval = setInterval(() => {
+			if (roomRef.current.users.length <= 1) return;
+			if (currentUserRef.current.position !== undefined) return;
+
 			if (progressRef.current >= MIN) {
 				sendWsMessageFromClient({
 					ws,
@@ -85,7 +84,7 @@ export function GameRoomScreen() {
 			});
 		}, 3 * 1000);
 
-		return () => clearInterval(intervalId);
+		return () => clearInterval(interval);
 	}, [ws]);
 
 	useInput((input, key) => {
