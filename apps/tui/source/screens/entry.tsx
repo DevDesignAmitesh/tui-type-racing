@@ -48,7 +48,10 @@ const ART = [
 		>
       
 			<Box width={"100%"} marginBottom={2} marginTop={4} alignItems='center' justifyContent='center' display='flex'>
-				<Gradient name="mind">{ART}</Gradient>
+				{ // @ts-ignore
+					<Gradient name="mind">{ART}</Gradient>
+				
+				 }
       </Box>
 
       <Text dimColor italic color={'whiteBright'}>
