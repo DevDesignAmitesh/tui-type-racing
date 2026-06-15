@@ -22,10 +22,10 @@ export default function Page(): JSX.Element {
             tui-typer
           </a>
           <div className="flex items-center gap-5 text-muted">
-            <a className="transition hover:text-ink" href={links.github}>
+            <a className="transition hover:text-ink" href={links.github} target="_blank">
               github
             </a>
-            <a className="transition hover:text-ink" href={links.npm}>
+            <a className="transition hover:text-ink" href={links.npm} target="_blank">
               npm
             </a>
           </div>
@@ -48,12 +48,14 @@ export default function Page(): JSX.Element {
               <a
                 className="inline-flex h-11 items-center justify-center border border-ink bg-ink px-5 text-sm font-medium text-white transition hover:bg-black"
                 href={links.npm}
+                target="_blank"
               >
                 Install package
               </a>
               <a
                 className="inline-flex h-11 items-center justify-center border border-line bg-white/60 px-5 text-sm font-medium text-ink transition hover:border-ink"
                 href={links.github}
+                target="_blank"
               >
                 View source
               </a>
@@ -109,16 +111,16 @@ export default function Page(): JSX.Element {
             ))}
           </div>
           <div className="flex gap-4 lg:justify-end text-xs">
-            <a className="hover:text-ink" href={links.authorGithub}>
+            <a className="hover:text-ink" href={links.authorGithub} target="_blank">
               github
             </a>
-            <a className="hover:text-ink" href={links.linkedin}>
+            <a className="hover:text-ink" href={links.linkedin} target="_blank">
               linkedIn
             </a>
-            <a className="hover:text-ink" href={links.twitter}>
+            <a className="hover:text-ink" href={links.twitter} target="_blank">
               twitter
             </a>
-            <a className="hover:text-ink" href={links.email}>
+            <a className="hover:text-ink" href={links.email} target="_blank">
               email
             </a>
           </div>
