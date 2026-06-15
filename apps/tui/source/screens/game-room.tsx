@@ -50,8 +50,8 @@ export function GameRoomScreen() {
 		if (!ws) return;
 		
 		const interval = setInterval(() => {
-			if (roomRef.current.users.length <= 1) return;
-			if (currentUserRef.current.position !== undefined) return;
+			if ((roomRef.current?.users ?? []).length <= 1) return;
+			if (currentUserRef.current?.position !== undefined) return;
 
 			if (progressRef.current >= MIN) {
 				sendWsMessageFromClient({
@@ -59,8 +59,8 @@ export function GameRoomScreen() {
 					dataToSend: { 
 						type: "room_ends", 
 						payload: {
-							user_id: currentUserRef.current.id,
-							room_code: roomRef.current.code
+							user_id: currentUserRef.current?.id ?? "",
+							room_code: roomRef.current?.code ?? 0
 						} 
 					}
 				});
@@ -72,8 +72,8 @@ export function GameRoomScreen() {
 					type: "room_broad_cast",
 					payload: {
 						progress: progressRef.current,
-						room_code: roomRef.current.code,
-						user_id: currentUserRef.current.id,
+						room_code: roomRef.current?.code ?? 0,
+						user_id: currentUserRef.current?.id ?? "",
 					},
 				},
 			});
@@ -128,7 +128,7 @@ export function GameRoomScreen() {
 					Players
 				</Text>
 
-				{room.users.map((usr) => (
+				{room?.users.map((usr) => (
 					<Text key={usr.id}>
 						{usr.name} {'─'.repeat(usr.progress)}
 						🏃
