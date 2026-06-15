@@ -8,6 +8,7 @@ export type User = {
   id: string;
   name: string;
   progress: number;
+  position?: number
   ws: ServerWs
 }
 
@@ -22,6 +23,11 @@ export type Room = {
   code: number;
   adminId: string;
   users: User[]
+}
+
+export type PositionMetaData = {
+  room_code: number;
+  user_id: string
 }
 
 export const MESSAGE_TYPE = {
@@ -73,6 +79,14 @@ export type WsDataFromClient =
       user_id: string,
     }
   }
+  |
+  {
+    type: "room_ends",
+    payload: {
+      room_code: number, 
+      user_id: string,
+    }
+  }
 
 export const sendWsMessageFromClient = ({ ws, dataToSend }: { ws: WebSocket, dataToSend: WsDataFromClient }) => {
   ws.send(JSON.stringify(dataToSend))
@@ -115,6 +129,13 @@ export type WsDataFromServer =
     payload: {
       room: Room,
       user_name: string
+    }
+  }
+  |
+  {
+    type: "room_ends",
+    payload: {
+      pos: number,
     }
   }
 

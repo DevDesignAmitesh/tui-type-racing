@@ -1,14 +1,16 @@
 import { CurrentUser, Screen, WsDataFromServer, type Room } from "@repo/common/common";
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
 import React from "react";
 import { WS_URL } from "../utils.js";
 
 type WebSocketContext = {
   ws: WebSocket | null;
   room: Room | null;
+  roomRef: React.MutableRefObject<Room | null>
   screen: Screen
   setScreen: (val: Screen) => void;
   currentUser: CurrentUser | null;
+  currentUserRef: React.MutableRefObject<CurrentUser | null>
   setCurrentUser: (val: CurrentUser) => void;
 }
 
@@ -19,7 +21,17 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
   const [room, setRoom] = useState<Room | null>(null)
   const [screen, setScreen] = useState<Screen>("auth")
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const currentUserRef = useRef<CurrentUser | null>(null);
+  const roomRef = useRef<Room | null>(null);
 
+  useEffect(() => {
+    currentUserRef.current = currentUser
+  }, [currentUser])
+
+  useEffect(() => {
+    roomRef.current = room
+  }, [room])
+  
 	useEffect(() => {
 		const ws = new WebSocket(WS_URL);
 		setWs(ws);
@@ -57,6 +69,15 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
         const { room } = parsedData.payload;
         setRoom(room);
       }
+
+      if (parsedData.type === "room_ends") {
+        const { pos } = parsedData.payload;
+
+        setCurrentUser({
+          ...currentUserRef.current!,
+          position: pos,
+        })
+      }
 		}
 	}, []);
 
@@ -64,11 +85,13 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
   const value = useMemo(
     () => ({
       ws,
-      room,
+      roomRef,
       screen,
       setScreen,
+      currentUserRef,
       currentUser,
-      setCurrentUser
+      setCurrentUser,
+      room,
     }),
     [ws, room, screen, currentUser]
   );

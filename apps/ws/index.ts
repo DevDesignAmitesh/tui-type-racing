@@ -1,6 +1,6 @@
 import { WebSocketServer } from "ws";
 import { generateRoomCode } from "./utils";
-import { roomManager } from "@repo/managers/manager";
+import { positionManager, roomManager } from "@repo/managers/manager";
 import { MESSAGE_TYPE, sendWsMessageFromServer, type User, type WsDataFromClient } from "@repo/common/common";
 
 const server  = new WebSocketServer({ port: 8080 });
@@ -13,6 +13,9 @@ server.on("connection", (ws) => {
 
   ws.on("message", (data) => {
     const parsedData = JSON.parse(data.toString()) as WsDataFromClient;
+
+    console.log("data from the client");
+    console.log(parsedData);
 
     // event: room_create
     if (parsedData.type === "room_create") {
@@ -218,6 +221,41 @@ server.on("connection", (ws) => {
         //   });
         // }
       }
+    }
+
+    // event: room_ends
+    if (parsedData.type === "room_ends") {
+      const { room_code, user_id } = parsedData.payload;
+
+      const existingRoom = roomManager.get(room_code);
+      if (!existingRoom) return;
+      
+      const existingUser = existingRoom.users.find((usr) => usr.id === user_id);
+      if (!existingUser) return;
+      
+      const last_updated_postion = positionManager.getLastUpdatedPositon(room_code);
+      if (last_updated_postion === undefined) return;
+      
+      positionManager.create({
+        room_code,
+        user_id
+      }, last_updated_postion + 1)
+      
+      const curr_user_pos = positionManager.get({
+        room_code,
+        user_id
+      });
+      if (curr_user_pos === undefined) return;
+
+      existingRoom.users.forEach((usr) => {
+        sendWsMessageFromServer({
+          ws: usr.ws,
+          dataToSend: {
+            type: "room_ends",
+            payload: { pos: curr_user_pos }
+          }
+        })
+      })
     }
   })
   

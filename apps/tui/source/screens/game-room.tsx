@@ -11,7 +11,7 @@ export function GameRoomScreen() {
 	const [query, setQuery] = useState<string>('');
 	const [typedChars, setTypedChars] = useState<number>(0);
 
-	const { ws, room, currentUser } = useWebContext();
+	const { ws, roomRef, currentUserRef, room } = useWebContext();
 	
 	function handleCheck(val: string) {
 		let to_check_from = sentence.split(' ');
@@ -30,7 +30,7 @@ export function GameRoomScreen() {
 		}
 	}
 
-	const MIN = 30;
+	const MIN = 10;
 	const progress = Math.min(counter, MIN);
 	
 	const startTime = useRef(Date.now());
@@ -52,25 +52,41 @@ export function GameRoomScreen() {
 	}, [progress]);
 	
 	useEffect(() => {
-		if (!ws || !currentUser || !room) return;
-		if (room.users.length <= 1) return;
+		if (!ws) return;
+		if (roomRef.current.users.length <= 1) return;
+		if (currentUserRef.current.position !== undefined) return;
 
+		console.log("progressRef.current >= MIN", progressRef.current >= MIN)
+		
 		const intervalId = setInterval(() => {
+			if (progressRef.current >= MIN) {
+				sendWsMessageFromClient({
+					ws,
+					dataToSend: { 
+						type: "room_ends", 
+						payload: {
+							user_id: currentUserRef.current.id,
+							room_code: roomRef.current.code
+						} 
+					}
+				});
+			}
+			
 			sendWsMessageFromClient({
 				ws,
 				dataToSend: {
 					type: "room_broad_cast",
 					payload: {
 						progress: progressRef.current,
-						room_code: room.code,
-						user_id: currentUser.id,
+						room_code: roomRef.current.code,
+						user_id: currentUserRef.current.id,
 					},
 				},
 			});
-		}, 1000);
+		}, 3 * 1000);
 
 		return () => clearInterval(intervalId);
-	}, [ws, currentUser, room?.code]);
+	}, [ws]);
 
 	useInput((input, key) => {
 		if (progress === MIN) return;
@@ -118,12 +134,13 @@ export function GameRoomScreen() {
 					Players
 				</Text>
 
-				{room?.users.map((usr) => (
-						<Text key={usr.id}>
+				{room.users.map((usr) => (
+					<Text key={usr.id}>
 						{usr.name} {'─'.repeat(usr.progress)}
 						🏃
 						{'─'.repeat(MIN - usr.progress)}
 						🏁
+						{" "} {usr.position && `Position: ${usr.position}`}
 					</Text>
 				))}
 			</Box>
