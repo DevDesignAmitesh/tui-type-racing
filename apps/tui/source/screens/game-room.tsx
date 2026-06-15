@@ -2,11 +2,10 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Box, Text, useInput} from 'ink';
 import { useWebContext } from '../context/ws.js';
 import { sendWsMessageFromClient } from '@repo/common/common';
+import { getRandomSentence } from '../random-fn.js';
 
 export function GameRoomScreen() {
-	const [sentence, setSentence] = useState<string>(
-		`The electric guitar echoed softly through the quiet fog-covered valley I just realized the secret to inner peace is simply avoiding pigeons on a windy day`,
-	);
+	const [sentence, setSentence] = useState<string>(getRandomSentence());
 	const [counter, setCounter] = useState(0);
 	const [query, setQuery] = useState<string>('');
 	const [typedChars, setTypedChars] = useState<number>(0);
@@ -22,11 +21,7 @@ export function GameRoomScreen() {
 			setSentence(to_check_from.join(' '));
 			setCounter(p => p + 1);
 			setQuery('');
-			setSentence(
-				p =>
-					p +
-					'How many words your brain processes while reading text calculated by dividing the total words in the text by the minutes it took you to read it',
-			);
+			setSentence( p => p + getRandomSentence());
 		}
 	}
 

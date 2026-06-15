@@ -23,14 +23,6 @@ class RoomManager {
   }  
 
   removeUser(user_id: string) {
-    this.create({
-      adminId: "",
-      code: 11,
-      id: "",
-      name: "",
-      status: "completed",
-      users: []
-    })
     for (let [_code, room] of this.rooms.entries()) {
       if (room.users.map((usr) => usr.id).includes(user_id)) {
         const idx = room.users.map((usr) => usr.id).findIndex(id => id === user_id)
@@ -41,6 +33,20 @@ class RoomManager {
         return { room, user }
       }
     }
+  }
+
+  getRoomCount() {
+    return this.rooms.size;
+  }
+
+  getUserCount() {
+    let count = 0;
+
+    for (const room of this.rooms.values()) {
+      count += room.users.length;
+    }
+
+    return count;
   }
 }
 

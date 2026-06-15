@@ -253,7 +253,7 @@ server.on("connection", (ws: ExtendedWs) => {
         if (existingUser.id === usr.id) {
           return {
             ...usr,
-            position: curr_user_pos 
+            position: curr_user_pos
           }
         }
 
@@ -277,10 +277,25 @@ server.on("connection", (ws: ExtendedWs) => {
         })
       })
     }
+
+    if (parsedData.type === "get_data") {
+      const totalRooms = roomManager.getRoomCount();
+	    const totalUsers = roomManager.getUserCount()
+
+      sendWsMessageFromServer({
+        ws,
+        dataToSend: {
+          type: "get_data",
+          payload: { totalRooms, totalUsers }
+        }
+      })
+    }
   })
   
   ws.on("close", () => {
     // TODO: event: room_leave
+    if (!ws.userId) return;
+
     const data = roomManager.removeUser(ws.userId);
     if (!data) return;
 
@@ -299,7 +314,6 @@ server.on("connection", (ws: ExtendedWs) => {
         }
       })
     });
-
   })  
 });
 

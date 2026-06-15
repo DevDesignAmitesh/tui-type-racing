@@ -4,6 +4,8 @@ export type Screen = "auth" | "create_room" | "waiting_area" | "running_game"
 export type EntryScreenInput = "name" | "room_code"
 export type CreateRoomScreenInput = "name" | "room_name"
 
+export type ExtendedWs = ServerWs & { userId: string };
+
 export type User = {
   id: string;
   name: string;
@@ -87,6 +89,10 @@ export type WsDataFromClient =
       user_id: string,
     }
   }
+  |
+  {
+    type: "get_data",
+  }
 
 export const sendWsMessageFromClient = ({ ws, dataToSend }: { ws: WebSocket, dataToSend: WsDataFromClient }) => {
   ws.send(JSON.stringify(dataToSend))
@@ -139,6 +145,14 @@ export type WsDataFromServer =
       room: Room,
       pos: number,
       user_id: string
+    }
+  }
+  |
+  {
+    type: "get_data",
+    payload: {
+      totalRooms: number,
+      totalUsers: number
     }
   }
 
