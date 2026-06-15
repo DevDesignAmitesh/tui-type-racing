@@ -1,21 +1,18 @@
 import { WebSocketServer } from "ws";
 import { generateRoomCode } from "./utils";
 import { positionManager, roomManager } from "@repo/managers/manager";
-import { MESSAGE_TYPE, sendWsMessageFromServer, type User, type WsDataFromClient } from "@repo/common/common";
+import { sendWsMessageFromServer, type ExtendedWs, type User, type WsDataFromClient } from "@repo/common/common";
 
-const server  = new WebSocketServer({ port: 8080 });
+const server = new WebSocketServer({ port: 8080 });
 const MAX_MEMBERS = 10;
 
-server.on("connection", (ws) => {
+server.on("connection", (ws: ExtendedWs) => {
   console.log("connected")
 
   ws.on("error", console.error);
 
   ws.on("message", (data) => {
     const parsedData = JSON.parse(data.toString()) as WsDataFromClient;
-
-    console.log("data from the client");
-    console.log(parsedData);
 
     // event: room_create
     if (parsedData.type === "room_create") {
@@ -25,6 +22,8 @@ server.on("connection", (ws) => {
       const room_id = crypto.randomUUID();
       const room_code = generateRoomCode();
 
+      ws.userId = admin_id;
+      
       // create room
       // push user and add as admin
       roomManager.create({
@@ -61,6 +60,8 @@ server.on("connection", (ws) => {
       if (!existingRoom) return;
       if (existingRoom.users.length >= MAX_MEMBERS) return;
       if (existingRoom.status !== "waiting") return;
+      
+      ws.userId = user_id;
       
       roomManager.create({
         ...existingRoom,
@@ -280,6 +281,25 @@ server.on("connection", (ws) => {
   
   ws.on("close", () => {
     // TODO: event: room_leave
-    console.log("connection closed");
+    const data = roomManager.removeUser(ws.userId);
+    if (!data) return;
+
+    const { room, user } = data;
+
+    room!.users.forEach((usr) => {
+      sendWsMessageFromServer({
+        ws: usr.ws,
+        dataToSend: {
+          type: "someone_left",
+          payload: {
+            room,
+            user_name: user!.name,
+            user_id: user!.id,
+          }
+        }
+      })
+    });
+
   })  
 });
+

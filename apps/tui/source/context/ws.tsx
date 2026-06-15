@@ -38,9 +38,6 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
 
 		ws.onmessage = (event) => {
 			const parsedData = JSON.parse(event.data) as WsDataFromServer;
-
-      console.log("data from the server");
-      console.log(parsedData)
       
 			if (
           parsedData.type === "room_create" || 
